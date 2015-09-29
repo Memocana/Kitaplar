@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> 
+  <link rel="stylesheet" href="css/w3-theme-deep-orange.css">
+  <link rel="stylesheet" href="css/page.css">
+  <title>E-Book Örneği</title>
+</head>
+<body>
+
+
+<div class="w3-container">
+  <div class="w3-half">
+    <div>
+      <canvas id="the-canvas" style="border:1px solid black"></canvas>
+    </div>
+  </div>
+  <div class="w3-half">
+    <h1>Kitap Denemesi</h1>
+    <div>
+      <button id="prev">Geri</button>
+      <button id="next">İleri</button>
+      &nbsp;&nbsp;
+      <button id="play" onclick="playSound()">Dinle</button>
+      &nbsp; &nbsp;
+      <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+      <p>Sesler deneme amaçlı sadece ilk beş sayfada mevcuttur.</p>
+      <p>Tasarım kaba bi fikir vermek için yaptığım bir şey daha grafik ve anlaşılır butonlar, arkaplan vs. ayarlanabilir rahatlıkla.</p>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- for legacy browsers add compatibility.js -->
+<!--<script src="../compatibility.js"></script>-->
+
+<script src="pdf.js"></script>
+
+<script id="script">
+  //
+  // If absolute URL from the remote server is provided, configure the CORS
+  // header on that server.
+  //
+  var url = 'Eda.pdf';
+  var audio = null;
+  var pdfDoc = null,
+      pageNum = 1,
+      pageRendering = false,
+      pageNumPending = null,
+      desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-40)/2)
+      canvas = document.getElementById('the-canvas'),
+      ctx = canvas.getContext('2d');
+  /**
+   * Get page info from document, resize canvas accordingly, and render page.
+   * @param num Page number.
+   */
+  function renderPage(num) {
+    pageRendering = true;
+    // Using promise to fetch the page
+    pdfDoc.getPage(num).then(function(page) {
+      var firstPort = page.getViewport(1);
+      var scale = desiredWidth / firstPort.width;
+      var viewport = page.getViewport(scale);
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      // Render PDF page into canvas context
+      var renderContext = {
+        canvasContext: ctx,
+        viewport: viewport
+      };
+      var renderTask = page.render(renderContext);
+      // Wait for rendering to finish
+      renderTask.promise.then(function () {
+        pageRendering = false;
+        if (pageNumPending !== null) {
+          // New page rendering is pending
+          renderPage(pageNumPending);
+          pageNumPending = null;
+        }
+      });
+    });
+    // Update page counters
+    document.getElementById('page_num').textContent = pageNum;
+  }
+  /**
+   * If another page rendering in progress, waits until the rendering is
+   * finised. Otherwise, executes rendering immediately.
+   */
+  function queueRenderPage(num) {
+    if (pageRendering) {
+      pageNumPending = num;
+    } else {
+      renderPage(num);
+    }
+  }
+  /**
+   * Displays previous page.
+   */
+  function onPrevPage() {
+    audio.pause();
+    audio.currentTime = 0;
+    if (pageNum <= 1) {
+      return;
+    }
+    pageNum--;
+    queueRenderPage(pageNum);
+  }
+  document.getElementById('prev').addEventListener('click', onPrevPage);
+  /**
+   * Displays next page.
+   */
+  function onNextPage() {
+    audio.pause();
+    audio.currentTime = 0;
+    if (pageNum >= pdfDoc.numPages) {
+      return;
+    }
+    pageNum++;
+    queueRenderPage(pageNum);
+  }
+  document.getElementById('next').addEventListener('click', onNextPage);
+  /**
+   * Asynchronously downloads PDF.
+   */
+  PDFJS.getDocument(url).then(function (pdfDoc_) {
+    pdfDoc = pdfDoc_;
+    document.getElementById('page_count').textContent = pdfDoc.numPages;
+    // Initial/first page rendering
+    renderPage(pageNum);
+  });
+
+  function playSound() {
+    audio = new Audio(pageNum+".m4a" );
+    audio.play();
+  }
+</script>
+<!--<h2>JavaScript code:</h2>
+<pre id="code"></pre>
+<script>
+  document.getElementById('code').textContent =
+      document.getElementById('script').text;
+</script>-->
+</body>
+</html>
