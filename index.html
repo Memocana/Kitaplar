@@ -49,6 +49,13 @@
   // If absolute URL from the remote server is provided, configure the CORS
   // header on that server.
   //
+  var canvas = document.getElementById("the-canvas");
+  var ctx = canvas.getContext("2d");
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "black";
+  ctx.textAlign = "center";
+  ctx.fillText("Loading PDF...",10,50);
+  
   PDFJS.workerSrc = 'pdf.worker.js';  
 
   var url = './Eda.pdf';
