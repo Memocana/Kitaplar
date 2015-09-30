@@ -51,13 +51,14 @@
   //
   PDFJS.workerSrc = 'pdf.worker.js';  
 
-  var url = 'Eda.pdf';
+  var url = 'http://memocana.github.io/Kitaplar/Eda.pdf';
+  alert(url);
   var audio = new Audio("1.m4a" );
   var pdfDoc = null,
       pageNum = 1,
       pageRendering = false,
       pageNumPending = null,
-      desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-40)/2)
+      desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-60)/2)
       canvas = document.getElementById('the-canvas'),
       ctx = canvas.getContext('2d');
   /**
