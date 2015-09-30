@@ -59,6 +59,7 @@
 
   var url = './Eda.pdf';
   var audio = new Audio("1.m4a" );
+  alert(document.documentElement.clientHeight);
   var pdfDoc = null,
       pageNum = 1,
       pageRendering = false,
@@ -66,6 +67,9 @@
       desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-60)/2)
       canvas = document.getElementById('the-canvas'),
       ctx = canvas.getContext('2d');
+      if (document.documentElement.clientWidth <= 600) {
+      	desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-40))
+      }
   /**
    * Get page info from document, resize canvas accordingly, and render page.
    * @param num Page number.
@@ -75,6 +79,10 @@
     // Using promise to fetch the page
     pdfDoc.getPage(num).then(function(page) {
       var firstPort = page.getViewport(1);
+      desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-60)/2)
+      if (document.documentElement.clientWidth <= 600) {
+      	desiredWidth = Math.min(document.documentElement.clientHeight, (document.documentElement.clientWidth-40))
+      }
       var scale = desiredWidth / firstPort.width;
       var viewport = page.getViewport(scale);
       canvas.height = viewport.height;
